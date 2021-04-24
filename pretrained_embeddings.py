@@ -28,7 +28,7 @@ def add_special_tokens_to_text(text):
     neutral_face_regex = "{0}{1}[\\/|l*]".format(eyes, nose)
     number_regex = r'[-+]?[.\d]*[\d]+[:,.\d]*'
     punct_repitition_regex = r'([!?.]){2,}'
-    word_ending_repition_regex = r'\b(\S*?)(.)\2{2,}\b'
+    word_ending_repitition_regex = r'\b(\S*?)(.)\2{2,}\b'
 
     text = re.sub(url_regex, "<URL>", text)
     text = re.sub(user_regex, "<USER>", text)
@@ -38,7 +38,7 @@ def add_special_tokens_to_text(text):
     text = re.sub(neutral_face_regex, "<NEUTRALFACE>", text)
     text = re.sub("<3", "<HEART>", text)
     text = re.sub(number_regex, "<NUMBER>", text)
-    text = re.sub(punct_repitition_regex, lambda match: match.group(0) + " <REPEAT>", text)
-    text = re.sub(word_ending_repition_regex, lambda match: match.group(0) + match.group(1) + " <ELONG>", text)
+    text = re.sub(punct_repitition_regex, lambda match: match.group(1) + " <REPEAT>", text)
+    text = re.sub(word_ending_repitition_regex, lambda match: match.group(1) + match.group(2) + " <ELONG>", text)
 
     return text
