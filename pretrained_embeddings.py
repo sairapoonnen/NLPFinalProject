@@ -18,6 +18,8 @@ def read_embeddings_from_file(file_path, word_whitelist=None):
 
 
 def add_special_tokens_to_text(text):
+    text = text.lower()
+
     url_regex = r'https?://\S+\b|www\.(\w+\.)+\S*'
     user_regex = r'@\w+'
     eyes = "[8:=;]"
@@ -30,6 +32,7 @@ def add_special_tokens_to_text(text):
     punct_repitition_regex = r'([!?.]){2,}'
     word_ending_repitition_regex = r'\b(\S*?)(.)\2{2,}\b'
 
+    text = re.sub(r'\s{2,}', ' ', text)
     text = re.sub(url_regex, "<URL>", text)
     text = re.sub(user_regex, "<USER>", text)
     text = re.sub(smiley_regex, "<SMILE>", text)
