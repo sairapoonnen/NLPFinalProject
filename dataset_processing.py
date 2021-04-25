@@ -24,8 +24,8 @@ class Tokenizer():
         self.word_char_regex = re.compile(r'\w')
         self.whitespace_regex = re.compile(r'\s')
         self.punct_chars = ".!?"
-        self.special_tokens = ["<URL>", "<USER>", "<SMILE>", "<LOLFACE>", "<SADFACE>", "<NEUTRALFACE>", "<HEART>",
-                          "<NUMBER>"]
+        self.special_tokens = ["<url>", "<user>", "<smile>", "<lolface>", "<sadface>", "<neutralface>", "<heart>",
+                          "<number>", "<elong>", "<repeat>"]
         self.emojis = EMOJI_UNICODE_ENGLISH.keys()
         self.max_emoji_len = max([len(e) for e in self.emojis])
 
@@ -42,25 +42,11 @@ class Tokenizer():
                 current_token += c
             else:
                 if len(current_token) > 0:
-                    if text[i+1:i+8] == "<ELONG>":
-                        tokens.append(current_token + " <ELONG>")
-                        i += 8
-                        current_token = ""
-                        continue
-                    else:
-                        if current_token != "rt":
-                            tokens.append(current_token)
-                        current_token = ""
-                if c in self.punct_chars:
-                    if len(current_token) > 0:
+                    if current_token != "rt":
                         tokens.append(current_token)
-                        current_token = ""
-                    if text[i+2:i+10] == "<REPEAT>":
-                        tokens.append(c + " <REPEAT>")
-                        i += 10
-                        continue
-                    else:
-                        tokens.append(c)
+                    current_token = ""
+                if c in self.punct_chars:
+                    tokens.append(c)
                 if c == "<":
                     is_special_token = False
                     for st in self.special_tokens:
@@ -106,15 +92,15 @@ class Tokenizer():
 
         text = re.sub(r'\s{2,}', ' ', text)
         text = re.sub(r'\'', '', text)
-        text = re.sub(url_regex, "<URL>", text)
-        text = re.sub(user_regex, "<USER>", text)
-        text = re.sub(smiley_regex, "<SMILE>", text)
-        text = re.sub(lol_face_regex, "<LOLFACE>", text)
-        text = re.sub(sad_face_regex, "<SADFACE>", text)
-        text = re.sub(neutral_face_regex, "<NEUTRALFACE>", text)
-        text = re.sub("<3", "<HEART>", text)
-        text = re.sub(number_regex, "<NUMBER>", text)
-        text = re.sub(punct_repitition_regex, lambda match: match.group(1) + " <REPEAT>", text)
-        text = re.sub(word_ending_repitition_regex, lambda match: match.group(1) + match.group(2) + " <ELONG>", text)
+        text = re.sub(url_regex, "<url>", text)
+        text = re.sub(user_regex, "<user>", text)
+        text = re.sub(smiley_regex, "<smile>", text)
+        text = re.sub(lol_face_regex, "<lolface>", text)
+        text = re.sub(sad_face_regex, "<sadface>", text)
+        text = re.sub(neutral_face_regex, "<neutralface>", text)
+        text = re.sub("<3", "<heart>", text)
+        text = re.sub(number_regex, "<number>", text)
+        text = re.sub(punct_repitition_regex, lambda match: match.group(1) + " <repeat>", text)
+        text = re.sub(word_ending_repitition_regex, lambda match: match.group(1) + match.group(2) + " <elong>", text)
 
         return text
