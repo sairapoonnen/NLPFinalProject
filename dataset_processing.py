@@ -104,3 +104,49 @@ class Tokenizer():
         text = re.sub(word_ending_repitition_regex, lambda match: match.group(1) + match.group(2) + " <elong>", text)
 
         return text
+
+
+class TextFeaturizer:
+    START_TOKEN = "<start>"
+    END_TOKEN = "<end>"
+    UNKNOWN_WORD_TOKEN = "<unknown>"
+    PADDING_ID = 0
+
+    def __init__(self, training_data, embeddings):
+        self.tokenizer = Tokenizer()
+        self.token_id_lookup = {TextFeaturizer.START_TOKEN: 1, TextFeaturizer.END_TOKEN: 2, TextFeaturizer.UNKNOWN_WORD_TOKEN: 3}
+        self.id_token_lookup = {1: TextFeaturizer.START_TOKEN, 2: TextFeaturizer.END_TOKEN, 3: TextFeaturizer.UNKNOWN_WORD_TOKEN}
+        self._create_token_id_mappings(training_data, embeddings)
+        self.vocab_size = len(self.token_id_lookup) + 1
+
+    def featurize(self, data):
+        data_tokenized = [self.tokenizer.tokenize(d) for d in data]
+        featurized_data = []
+        for sample in data_tokenized:
+            featurized_sample = [self.token_id_lookup[TextFeaturizer.START_TOKEN]]
+            for token in sample:
+                if token not in self.token_id_lookup:
+                    featurized_sample.append(self.token_id_lookup[TextFeaturizer.UNKNOWN_WORD_TOKEN])
+                else:
+                    featurized_sample.append(self.token_id_lookup[token])
+            featurized_sample.append(self.token_id_lookup[TextFeaturizer.END_TOKEN])
+            featurized_data.append(featurized_sample)
+
+        return featurized_data
+
+    def _create_token_id_mappings(self, training_data, embeddings):
+        data_tokenized = [self.tokenizer.tokenize(d) for d in training_data]
+        distinct_tokens = set()
+        for sample in data_tokenized:
+            for token in sample:
+                distinct_tokens.add(token)
+
+        for embedding_token in embeddings.keys():
+            distinct_tokens.add(embedding_token)
+
+        current_max_id = max(self.token_id_lookup.values())
+        for token in distinct_tokens:
+            if token not in self.token_id_lookup:
+                current_max_id += 1
+                self.token_id_lookup[token] = current_max_id
+                self.id_token_lookup[current_max_id] = token
